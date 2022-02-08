@@ -4,6 +4,8 @@ namespace Tdkomplekt\OzonApi;
 
 use Illuminate\Support\ServiceProvider;
 use Tdkomplekt\OzonApi\Console\Commands\SyncAll;
+use Tdkomplekt\OzonApi\Console\Commands\SyncAttributes;
+use Tdkomplekt\OzonApi\Console\Commands\SyncCategories;
 
 class OzonApiServiceProvider extends ServiceProvider
 {
@@ -25,6 +27,8 @@ class OzonApiServiceProvider extends ServiceProvider
 
             $this->commands([
                 SyncAll::class,
+                SyncCategories::class,
+                SyncAttributes::class,
             ]);
 
         }
