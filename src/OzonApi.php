@@ -132,7 +132,7 @@ class OzonApi
             'id' => $categoryId
         ], [
             'title' => $title,
-            'category_parent_id' => $parentCategoryId
+            'parent_id' => $parentCategoryId
         ]);
 
         if ($childrenArray) {
