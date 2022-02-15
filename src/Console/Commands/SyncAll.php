@@ -14,10 +14,8 @@ class SyncAll extends Command
         $ozonApi = new OzonApi();
 
         $starTime = now();
-
-//        $ozonApi->syncCategories();
+        $ozonApi->syncCategories();
         $ozonApi->syncAttributes();
-
         $endTime = now();
 
         echo $endTime->diffForHumans($starTime);

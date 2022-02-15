@@ -11,9 +11,12 @@ class SyncAttributes extends Command
 
     public function handle()
     {
+        $ozonApi = new OzonApi();
+
         $starTime = now();
-        (new OzonApi())->syncAttributes();
+        $ozonApi->syncAttributes();
         $endTime = now();
+
         echo $endTime->diffForHumans($starTime);
     }
 }

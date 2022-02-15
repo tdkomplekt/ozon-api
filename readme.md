@@ -12,9 +12,19 @@ Via Composer
 
 ``` bash
 $ composer require tdkomplekt/ozon-api
+$ php artisan migrate
+$ php artisan vendor:publish // to publish config/ozon-api.php
 ```
 
 ## Usage
+
+Commands list
+
+``` bash
+$ php artisan ozon:sync-all
+$ php artisan ozon:sync-categories
+$ php artisan ozon:sync-attributes
+```
 
 ## Change log
 

@@ -11,9 +11,12 @@ class SyncCategories extends Command
 
     public function handle()
     {
+        $ozonApi = new OzonApi();
+
         $starTime = now();
-        (new OzonApi())->syncCategories();
+        $ozonApi->syncCategories();
         $endTime = now();
+
         echo $endTime->diffForHumans($starTime);
     }
 }
