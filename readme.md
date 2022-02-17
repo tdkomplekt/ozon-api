@@ -13,7 +13,7 @@ Via Composer
 ``` bash
 $ composer require tdkomplekt/ozon-api
 $ php artisan migrate
-$ php artisan vendor:publish // to publish config/ozon-api.php
+$ php artisan vendor:publish 
 ```
 
 ## Usage

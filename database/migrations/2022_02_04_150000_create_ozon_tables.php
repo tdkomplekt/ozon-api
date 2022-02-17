@@ -15,8 +15,10 @@ class CreateOzonTables extends Migration
     {
         Schema::create('ozon_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('parent_id')->default(0);
+            $table->foreignId('parent_id')->default(0)->index();
             $table->string('title')->nullable()->default(null)->index();
+            $table->string('search')->nullable()->default(null)->index();
+            $table->boolean('last_node')->default(0)->index();
         });
 
         Schema::create('ozon_attributes', function (Blueprint $table) {
@@ -48,8 +50,8 @@ class CreateOzonTables extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('ozon_category_attribute');
         Schema::dropIfExists('ozon_categories');
         Schema::dropIfExists('ozon_attributes');
-        Schema::dropIfExists('ozon_category_attribute');
     }
 }

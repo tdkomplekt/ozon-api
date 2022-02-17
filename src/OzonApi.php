@@ -141,4 +141,15 @@ class OzonApi
             }
         }
     }
+
+    public function fillCategoriesCustomFields()
+    {
+        $categories = OzonCategory::with(['children', 'parent.parent'])->get();
+
+        $categories->each(function ($category) {
+            $category->search = mb_strtoupper($category->getFullTitle(';'));
+            $category->last_node = $category->children->count() == 0;
+            $category->save();
+        });
+    }
 }

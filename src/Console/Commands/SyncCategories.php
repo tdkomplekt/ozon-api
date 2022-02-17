@@ -15,6 +15,7 @@ class SyncCategories extends Command
 
         $starTime = now();
         $ozonApi->syncCategories();
+        $ozonApi->fillCategoriesCustomFields();
         $endTime = now();
 
         echo $endTime->diffForHumans($starTime);
