@@ -42,11 +42,9 @@ class OzonCategory extends Model
         return $this->belongsToMany(OzonAttribute::class, 'ozon_category_attribute');
     }
 
-    public function getFullTitle($separator = ' > ', $appendSelf = true): string
+    public function getFullTitle($separator = ' > '): string
     {
-        $parents = collect($appendSelf ? [$this] : []);
-        $this->appendParentFor($parents, $this);
-        return implode($separator, $parents->pluck('title')->toArray());
+        return implode($separator, explode(';', $this->search));
     }
 
     protected function appendParentFor(Collection &$parents, OzonCategory $category): Collection
