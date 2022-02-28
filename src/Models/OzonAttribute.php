@@ -14,8 +14,6 @@ class OzonAttribute extends Model
     protected $table = 'ozon_attributes';
     protected $guarded = [];
 
-    public $timestamps = false;
-
     protected static function boot()
     {
         parent::boot();

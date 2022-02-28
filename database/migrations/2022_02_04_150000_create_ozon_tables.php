@@ -16,9 +16,11 @@ class CreateOzonTables extends Migration
         Schema::create('ozon_categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('parent_id')->default(0)->index();
-            $table->string('title')->nullable()->default(null)->index();
-            $table->string('search')->nullable()->default(null)->index();
+            $table->string('name')->nullable()->default(null)->index();
+            $table->string('full_name')->nullable()->default(null)->index();
             $table->boolean('last_node')->default(0)->index();
+
+            $table->timestamps();
         });
 
         Schema::create('ozon_attributes', function (Blueprint $table) {
@@ -31,6 +33,8 @@ class CreateOzonTables extends Migration
             $table->foreignId('group_id')->default(0);
             $table->string('group_name')->default('');
             $table->foreignId('dictionary_id')->default(0);
+
+            $table->timestamps();
         });
 
         Schema::create('ozon_category_attribute', function (Blueprint $table) {

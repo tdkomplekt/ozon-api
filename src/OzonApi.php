@@ -31,7 +31,7 @@ class OzonApi
         return $dataArray['result'][0]['attributes'] ?? [];
     }
 
-    private function sendRequestCategoriesTree()
+    public function sendRequestCategoriesTree()
     {
         $url = 'https://api-seller.ozon.ru/v1/categories/tree';
         return $this->sendRequest($url);
@@ -126,14 +126,15 @@ class OzonApi
         }
     }
 
-    private function addCategory($categoryId, $title, $childrenArray = null, $parentCategoryId = 0)
+    private function addCategory($categoryId, $categoryName, $childrenArray = null, $parentCategoryId = 0)
     {
-        OzonCategory::firstOrCreate([
-            'id' => $categoryId
-        ], [
-            'title' => $title,
-            'parent_id' => $parentCategoryId
-        ]);
+        $category = OzonCategory::firstOrCreate(['id' => $categoryId]);
+        if($category->getOriginal('name') != $categoryName || $category->getOriginal('parent_id') != $parentCategoryId) {
+            $category->update([
+                'name' => $categoryName,
+                'parent_id' => $parentCategoryId,
+            ]);
+        }
 
         if ($childrenArray) {
             foreach ($childrenArray as $subCategory) {
@@ -147,8 +148,9 @@ class OzonApi
         $categories = OzonCategory::with(['children', 'parent.parent'])->get();
 
         $categories->each(function ($category) {
-            $category->search = $category->getFullTitle(';');
+            $category->full_name = $category->getFullName(';');
             $category->last_node = $category->children->count() == 0;
+            $category->timestamps = false;
             $category->save();
         });
     }

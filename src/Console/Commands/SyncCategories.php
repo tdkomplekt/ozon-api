@@ -18,6 +18,8 @@ class SyncCategories extends Command
         $ozonApi->fillCategoriesCustomFields();
         $endTime = now();
 
-        echo $endTime->diffForHumans($starTime);
+        echo "Compiled Successfully in " . $endTime->diffInSeconds($starTime) . " seconds";
+
+        return Command::SUCCESS;
     }
 }
