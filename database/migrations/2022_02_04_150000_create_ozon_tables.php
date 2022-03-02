@@ -13,6 +13,8 @@ class CreateOzonTables extends Migration
      */
     public function up()
     {
+        $this->down();
+
         Schema::create('ozon_categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('parent_id')->default(0)->index();
