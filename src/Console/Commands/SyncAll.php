@@ -15,6 +15,7 @@ class SyncAll extends Command
 
         $starTime = now();
         $ozonApi->syncCategories();
+        $ozonApi->fillCategoriesCustomFields();
         $ozonApi->syncAttributes();
         $endTime = now();
 
