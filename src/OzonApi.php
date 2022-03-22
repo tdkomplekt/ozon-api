@@ -2,54 +2,35 @@
 
 namespace Tdkomplekt\OzonApi;
 
-use Tdkomplekt\OzonApi\Models\OzonAttribute;
+use App\Models\Product;
+use Composer\Util\Http\Response;
 use Tdkomplekt\OzonApi\Models\OzonCategory;
+use Tdkomplekt\OzonApi\Models\OzonProduct;
 
 class OzonApi
 {
-    public function getCategoriesTreeArray()
-    {
-        $response = $this->sendRequestCategoriesTree();
+    protected string $language = 'DEFAULT';
 
-        $dataArray = [];
-        if ($response) {
-            $dataArray = json_decode($response, true);
-        }
-
-        return $dataArray['result'] ?? [];
-    }
-
-    public function getAttributes($categoryId, $language = 'DEFAULT'): ?array
-    {
-        $response = $this->sendRequestAttributes($categoryId, $language);
-
-        $dataArray = [];
-        if ($response) {
-            $dataArray = json_decode($response, true);
-        }
-
-        return $dataArray['result'][0]['attributes'] ?? [];
-    }
-
-    public function sendRequestCategoriesTree()
+    public function getCategoriesTree()
     {
         $url = 'https://api-seller.ozon.ru/v1/categories/tree';
+
         return $this->sendRequest($url);
     }
 
-    public function getCategoryTree($categoryId, $language = 'DEFAULT')
+    public function getCategoryTree($categoryId)
     {
         $url = 'https://api-seller.ozon.ru/v2/category/tree';
 
         $data = [
             'category_id' => $categoryId,
-            'language' => $language,
+            'language' => $this->language,
         ];
 
         return $this->sendRequest($url, $data);
     }
 
-    public function sendRequestAttributes($categoryId, $language = 'DEFAULT')
+    public function getCategoryAttributes($categoryId)
     {
         $url = 'https://api-seller.ozon.ru/v3/category/attribute';
 
@@ -58,28 +39,123 @@ class OzonApi
             'category_id' => [
                 $categoryId
             ],
-            'language' => $language,
+            'language' => $this->language,
         ];
 
         return $this->sendRequest($url, $data);
     }
 
-    private function sendRequest($url, $data = null)
+    public function getCategoryAttributeValues($categoryId, $attributeId, $latsValueId = 0, $limit = 5000)
+    {
+        $url = 'https://api-seller.ozon.ru/v2/category/attribute/values';
+
+        $data = [
+            'attribute_id' => $attributeId,
+            'category_id' => $categoryId,
+            'language' => $this->language,
+            'last_value_id' => $latsValueId,
+            'limit' => $limit,
+        ];
+
+        return $this->sendRequest($url, $data);
+    }
+
+    // Для получения информации остаточно передать один из трех аттрибутов
+    public function getProductInfo(string $offerId = null, int $ozonProductId = null, int $ozonSku = null)
+    {
+        $url = 'https://api-seller.ozon.ru/v2/product/info';
+
+        $data = [
+            'offer_id' => $offerId ?: '',
+            'product_id' => $ozonProductId ?: 0,
+            'sku' => $ozonSku ?: 0,
+        ];
+
+        return $this->sendRequest($url, $data);
+    }
+
+    public function importProduct(OzonProduct $ozonProduct)
+    {
+        $url = 'https://api-seller.ozon.ru/v2/product/import';
+
+        $data = $this->getProductImportData($ozonProduct);
+
+        return $this->sendRequest($url, $data);
+    }
+
+    public function getProductImportData(OzonProduct $ozonProduct): array
+    {
+        return ['items' => [[
+
+            'attributes' => $this->formatAttributesArray($ozonProduct),
+
+            "complex_attributes" => [],
+
+            "offer_id" => $ozonProduct->getAttribute('offer_id'),
+            "category_id" => $ozonProduct->getAttribute('category_id'),
+            "barcode" => $ozonProduct->getAttribute('barcode') ?? '',
+            "name" => $ozonProduct->getAttribute('name'),
+
+            "old_price" => (string) $ozonProduct->getAttribute('old_price') ?? '',
+            "price" => (string) $ozonProduct->getAttribute('price') ?? '',
+            "premium_price" => (string) $ozonProduct->getAttribute('premium_price') ?? '',
+            "vat" => (string) $ozonProduct->getAttribute('vat') ?? "0.2",
+
+            "weight" => $ozonProduct->getAttribute('weight'),
+            "weight_unit" => $ozonProduct->getAttribute('weight_unit') ?? "g",
+
+            "depth" => $ozonProduct->getAttribute('depth'),
+            "height" => $ozonProduct->getAttribute('height'),
+            "width" => $ozonProduct->getAttribute('width'),
+            "dimension_unit" => $ozonProduct->getAttribute('dimension_unit') ?? "mm",
+
+            "primary_image" => $ozonProduct->getAttribute('primary_image') ?? "",
+            "images" => $ozonProduct->getAttribute('images') ?? [],
+            "images360" => $ozonProduct->getAttribute('images360') ?? [],
+            "color_image" => $ozonProduct->getAttribute('color_image') ?? "",
+            "pdf_list" => $ozonProduct->getAttribute('pdf_list') ?? []
+
+        ]]];
+    }
+
+    protected function formatAttributesArray(OzonProduct $ozonProduct): array
+    {
+        $attributes = [];
+        foreach ($ozonProduct->attributes()->get() as $attribute) {
+            if(isset($attribute->pivot->values['value'])) {
+
+                array_push($attributes, [
+                    "complex_id" => 0,
+                    "id" => $attribute->id,
+                    "values" => [
+                        [
+                            "dictionary_value_id" => $attribute->pivot->values ? $attribute->pivot->values['option_id'] : null,
+                            "value" => $attribute->pivot->values ? $attribute->pivot->values['value'] : null,
+                        ]
+                    ]
+                ]);
+            }
+        }
+
+        return $attributes;
+    }
+
+    protected function sendRequest($url, array $data = null)
     {
         $curl = curl_init($url);
 
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-        if($data) {
+        if ($data) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }
 
         $headers = array(
             "X-Custom-Header: value",
             "Content-Type: application/json",
-            "Client-Id: " . config('ozon-api.client_id'),
-            "Api-Key: ". config('ozon-api.api_key'),
+            "Client-Id: ".config('ozon-api.client_id'),
+            "Api-Key: ".config('ozon-api.api_key'),
         );
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
@@ -87,71 +163,5 @@ class OzonApi
         curl_close($curl);
 
         return $response;
-    }
-
-    public function syncAttributes()
-    {
-        foreach (OzonCategory::all() as $category) {
-            $attributesTreeArray = $this->getAttributes($category->id);
-
-            foreach ($attributesTreeArray as $attribute) {
-
-                $attribute = OzonAttribute::firstOrCreate([
-                    'id' =>  $attribute['id'],
-                ], [
-                    'name' => $attribute['name'],
-                    'description' => $attribute['description'],
-                    'type' => $attribute['type'],
-                    'is_collection' => $attribute['is_collection'],
-                    'is_required' => $attribute['is_required'],
-                    'group_id' => $attribute['group_id'],
-                    'group_name' => $attribute['group_name'],
-                    'dictionary_id' => $attribute['dictionary_id'],
-                ]);
-
-                $category->attributes()->save($attribute, [
-                    'ozon_category_id' => $category->id,
-                    'ozon_attribute_id' => $attribute->id,
-                ]);
-            }
-        }
-    }
-
-    public function syncCategories()
-    {
-        $categoriesTreeArray = $this->getCategoriesTreeArray();
-
-        foreach ($categoriesTreeArray as $category) {
-            $this->addCategory($category['category_id'], $category['title'], $category['children']);
-        }
-    }
-
-    private function addCategory($categoryId, $categoryName, $childrenArray = null, $parentCategoryId = 0)
-    {
-        $category = OzonCategory::firstOrCreate(['id' => $categoryId]);
-        if($category->getOriginal('name') != $categoryName || $category->getOriginal('parent_id') != $parentCategoryId) {
-            $category->update([
-                'name' => $categoryName,
-                'parent_id' => $parentCategoryId,
-            ]);
-        }
-
-        if ($childrenArray) {
-            foreach ($childrenArray as $subCategory) {
-                $this->addCategory($subCategory['category_id'], $subCategory['title'], $subCategory['children'], $categoryId);
-            }
-        }
-    }
-
-    public function fillCategoriesCustomFields()
-    {
-        $categories = OzonCategory::with(['children', 'parent.parent'])->get();
-
-        $categories->each(function ($category) {
-            $category->full_name = $category->getFullName(';');
-            $category->last_node = $category->children->count() == 0;
-            $category->timestamps = false;
-            $category->save();
-        });
     }
 }

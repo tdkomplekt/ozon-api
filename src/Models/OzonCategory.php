@@ -3,19 +3,15 @@
 namespace Tdkomplekt\OzonApi\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
+use Tdkomplekt\OzonApi\Base\Model;
 
 class OzonCategory extends Model
 {
-    use HasFactory;
-
     protected $table = 'ozon_categories';
-    protected $guarded = [];
 
     protected static function boot()
     {

@@ -21,9 +21,12 @@ $ php artisan vendor:publish
 Commands list
 
 ``` bash
-$ php artisan ozon:sync-all
+$ php artisan ozon:tables-refresh
 $ php artisan ozon:sync-categories
 $ php artisan ozon:sync-attributes
+$ php artisan ozon:sync-options
+$ php artisan ozon:sync-options {category_id}
+$ php artisan ozon:sync-options {category_id} {attribute_id}
 ```
 
 ## Change log

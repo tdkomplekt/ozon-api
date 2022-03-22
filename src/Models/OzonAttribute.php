@@ -3,16 +3,13 @@
 namespace Tdkomplekt\OzonApi\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Tdkomplekt\OzonApi\Base\Model;
 
 class OzonAttribute extends Model
 {
-    use HasFactory;
-
     protected $table = 'ozon_attributes';
-    protected $guarded = [];
 
     protected static function boot()
     {
@@ -23,8 +20,44 @@ class OzonAttribute extends Model
         });
     }
 
-    public function categories()
+    public function categories(): BelongsToMany
     {
         return $this->belongsToMany(OzonCategory::class, 'ozon_category_attribute');
+    }
+
+    public function options(): BelongsToMany
+    {
+        $options = $this->belongsToMany(
+            OzonAttributeOption::class,
+            'ozon_category_attribute_option',
+            'ozon_attribute_id',
+            'ozon_attribute_option_id',
+            'id',
+            'id'
+        );
+
+        // USE CATEGORY RELATION
+        if ($this->pivot && $this->pivot->ozon_category_id) {
+            $options = $options->where(function ($query) {
+                $query->whereIn('ozon_category_id', [0, $this->pivot->ozon_category_id]);
+            });
+        } elseif ($this->pivot_ozon_category_id) {
+            $options = $options->where(function ($query) {
+                $query->whereIn('ozon_category_id', [0, $this->pivot_ozon_category_id]);
+            });
+        }
+
+        return $options;
+    }
+
+    public function values(): HasMany
+    {
+        $options = $this->hasMany(
+            OzonProductAttributeValuePivot::class,
+            'ozon_attribute_id',
+            'id',
+        );
+
+        return $options;
     }
 }

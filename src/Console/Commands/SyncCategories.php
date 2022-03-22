@@ -2,8 +2,8 @@
 
 namespace Tdkomplekt\OzonApi\Console\Commands;
 
-use Illuminate\Console\Command;
-use Tdkomplekt\OzonApi\OzonApi;
+use Tdkomplekt\OzonApi\Base\Command;
+use Tdkomplekt\OzonApi\Models\OzonCategory;
 
 class SyncCategories extends Command
 {
@@ -11,15 +11,67 @@ class SyncCategories extends Command
 
     public function handle()
     {
-        $ozonApi = new OzonApi();
-
-        $starTime = now();
-        $ozonApi->syncCategories();
-        $ozonApi->fillCategoriesCustomFields();
+        $startTime = now();
+        $this->syncCategories();
+        $this->fillCustomFields();
         $endTime = now();
 
-        echo "Compiled Successfully in " . $endTime->diffInSeconds($starTime) . " seconds";
+        return $this->success($startTime, $endTime);
+    }
 
-        return Command::SUCCESS;
+    public function syncCategories()
+    {
+        $categoriesTreeArray = $this->getCategoriesTreeArray();
+
+        foreach ($categoriesTreeArray as $category) {
+            $this->addCategory($category['category_id'], $category['title'], $category['children']);
+        }
+    }
+
+    public function getCategoriesTreeArray()
+    {
+        $response = $this->ozonApi->getCategoriesTree();
+
+        $dataArray = [];
+        if ($response) {
+            $dataArray = json_decode($response, true);
+        }
+
+        return $dataArray['result'] ?? [];
+    }
+
+    private function addCategory($categoryId, $categoryName, $childrenArray = null, $parentCategoryId = 0)
+    {
+        $category = OzonCategory::firstOrCreate(['id' => $categoryId]);
+        if ($category->getOriginal('name') != $categoryName || $category->getOriginal(
+                'parent_id'
+            ) != $parentCategoryId) {
+            $category->update([
+                'name' => $categoryName,
+                'parent_id' => $parentCategoryId,
+            ]);
+        }
+
+        if ($childrenArray) {
+            foreach ($childrenArray as $subCategory) {
+                $this->addCategory(
+                    $subCategory['category_id'],
+                    $subCategory['title'],
+                    $subCategory['children'],
+                    $categoryId
+                );
+            }
+        }
+    }
+
+    public function fillCustomFields()
+    {
+        $categories = OzonCategory::with(['children', 'parent.parent'])->get();
+
+        $categories->each(function ($category) {
+            $category->full_name = $category->getFullName(';');
+            $category->last_node = $category->children->count() == 0;
+            $category->save();
+        });
     }
 }
