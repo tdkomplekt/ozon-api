@@ -24,23 +24,24 @@ class SyncAttributes extends Command
         foreach (OzonCategory::all() as $category) {
             $attributesTreeArray = $this->getAttributes($category->id);
 
-            foreach ($attributesTreeArray as $attribute) {
+            foreach ($attributesTreeArray as $attributeData) {
                 $attribute = OzonAttribute::firstOrCreate([
-                    'id' => $attribute['id'],
+                    'id' => $attributeData['id'],
                 ], [
-                    'name' => $attribute['name'],
-                    'description' => $attribute['description'],
-                    'type' => $attribute['type'],
-                    'is_collection' => $attribute['is_collection'],
-                    'is_required' => $attribute['is_required'],
-                    'group_id' => $attribute['group_id'],
-                    'group_name' => $attribute['group_name'],
-                    'dictionary_id' => $attribute['dictionary_id'],
+                    'name' => $attributeData['name'],
+                    'description' => $attributeData['description'],
+                    'type' => $attributeData['type'],
+                    'is_collection' => $attributeData['is_collection'],
+                    'dictionary_id' => $attributeData['dictionary_id'],
                 ]);
 
                 $category->attributes()->attach($attribute, [
                     'ozon_category_id' => $category->id,
                     'ozon_attribute_id' => $attribute->id,
+
+                    'is_required' => $attributeData['is_required'],
+                    'group_id' => $attributeData['group_id'],
+                    'group_name' => $attributeData['group_name'],
                 ]);
             }
         }

@@ -2,6 +2,7 @@
 
 namespace Tdkomplekt\OzonApi\Models;
 
+use Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -44,7 +45,8 @@ class OzonCategory extends Model
 
     public function attributes(): BelongsToMany
     {
-        return $this->belongsToMany(OzonAttribute::class, 'ozon_category_attribute');
+        return $this->belongsToMany(OzonAttribute::class, 'ozon_category_attribute')
+            ->withPivot(Schema::getColumnListing('ozon_category_attribute'));
     }
 
     public function getFullName($separator = ' > ', $appendSelf = true): string

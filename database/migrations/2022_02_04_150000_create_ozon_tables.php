@@ -28,10 +28,8 @@ class CreateOzonTables extends Migration
             $table->string('name')->nullable()->default(null);
             $table->text('description')->nullable()->default(null);
             $table->string('type')->nullable()->default(null);
+
             $table->boolean('is_collection')->default(false);
-            $table->boolean('is_required')->default(false);
-            $table->foreignId('group_id')->default(0);
-            $table->string('group_name')->default('');
             $table->foreignId('dictionary_id')->default(0);
         });
 
@@ -39,6 +37,11 @@ class CreateOzonTables extends Migration
             $table->id();
             $table->foreignId('ozon_category_id')->index();
             $table->foreignId('ozon_attribute_id')->index();
+
+            $table->boolean('is_required')->default(false);
+            $table->foreignId('group_id')->default(0);
+            $table->string('group_name')->default('');
+
 
             $table->foreign('ozon_category_id')->references('id')->on('ozon_categories')->onDelete('cascade');
             $table->foreign('ozon_attribute_id')->references('id')->on('ozon_attributes')->onDelete('cascade');

@@ -12,7 +12,7 @@ class TablesRefresh extends Command
 
     public function handle()
     {
-        DB::table('migrations')->where('migration', 'test')->delete();
+        DB::table('migrations')->where('migration', '2022_02_04_150000_create_ozon_tables')->delete();
 
         Artisan::call('migrate', [
             '--path' => 'vendor/tdkomplekt/ozon-api/database/migrations/2022_02_04_150000_create_ozon_tables.php'
