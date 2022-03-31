@@ -2,6 +2,7 @@
 
 namespace Tdkomplekt\OzonApi\Console\Commands;
 
+use DB;
 use Tdkomplekt\OzonApi\Base\Command;
 use Tdkomplekt\OzonApi\Models\OzonAttribute;
 use Tdkomplekt\OzonApi\Models\OzonCategory;
@@ -35,10 +36,10 @@ class SyncAttributes extends Command
                     'dictionary_id' => $attributeData['dictionary_id'],
                 ]);
 
-                $category->attributes()->attach($attribute, [
+                DB::table('ozon_category_attribute')->updateOrInsert([
                     'ozon_category_id' => $category->id,
                     'ozon_attribute_id' => $attribute->id,
-
+                ], [
                     'is_required' => $attributeData['is_required'],
                     'group_id' => $attributeData['group_id'],
                     'group_name' => $attributeData['group_name'],

@@ -2,7 +2,6 @@
 
 namespace Tdkomplekt\OzonApi;
 
-use App\Models\Product;
 use Composer\Util\Http\Response;
 use Tdkomplekt\OzonApi\Models\OzonCategory;
 use Tdkomplekt\OzonApi\Models\OzonProduct;
