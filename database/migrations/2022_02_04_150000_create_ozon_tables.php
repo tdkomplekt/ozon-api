@@ -66,6 +66,8 @@ class CreateOzonTables extends Migration
 
         Schema::create('ozon_products', function (\Illuminate\Database\Schema\Blueprint $table) {
             $table->id();
+            $table->foreignId('client_id')->nullable()->default(null);
+
             $table->string('offer_id')->index();
             $table->foreignId('category_id')->index();
             $table->string('name');
@@ -75,32 +77,35 @@ class CreateOzonTables extends Migration
             $table->float('price')->nullable()->default(null);
             $table->float('old_price')->nullable()->default(null);
             $table->float('premium_price')->nullable()->default(null);
-
             $table->float('vat', 2)->nullable()->default(null);;
 
             $table->integer('weight')->nullable()->default(null);
-            $table->enum('weight_unit', ['g', 'kg'])->default('g');
+            $table->enum('weight_unit', ['g'])->default('g');
 
             $table->integer('width')->nullable()->default(null);
             $table->integer('height')->nullable()->default(null);
             $table->integer('depth')->nullable()->default(null);
-
             $table->enum('dimension_unit', ['mm'])->default('mm');
 
+            $table->json('attributes')->nullable()->default(null);
+            $table->json('complex_attributes')->nullable()->default(null);
+
+            $table->string('primary_image')->nullable()->default(null);
+            $table->string('color_image')->nullable()->default(null);
+
+            $table->json('images')->nullable()->default(null);
+            $table->json('images360')->nullable()->default(null);
+            $table->json('pdf_list')->nullable()->default(null);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('ozon_tasks', function (Blueprint $table) {
+            $table->id();
+            $table->json('response')->nullable()->default(null);
             $table->timestamps();
         });
-
-        Schema::create('ozon_product_attribute_values', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ozon_product_id')->index();
-            $table->foreignId('ozon_attribute_id')->index();
-
-            $table->foreign('ozon_product_id')->references('id')->on('ozon_products')->onDelete('cascade');
-            $table->foreign('ozon_attribute_id')->references('id')->on('ozon_attributes')->onDelete('cascade');
-
-            $table->json('values')->nullable()->default(null);
-        });
-
     }
 
     /**
@@ -110,7 +115,7 @@ class CreateOzonTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ozon_product_attribute_values');
+        Schema::dropIfExists('ozon_tasks');
         Schema::dropIfExists('ozon_category_attribute_option');
         Schema::dropIfExists('ozon_attribute_options');
         Schema::dropIfExists('ozon_category_attribute');

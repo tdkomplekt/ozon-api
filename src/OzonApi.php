@@ -5,6 +5,7 @@ namespace Tdkomplekt\OzonApi;
 use Composer\Util\Http\Response;
 use Tdkomplekt\OzonApi\Models\OzonCategory;
 use Tdkomplekt\OzonApi\Models\OzonProduct;
+use Tdkomplekt\OzonApi\Models\OzonTask;
 
 class OzonApi
 {
@@ -59,7 +60,6 @@ class OzonApi
         return $this->sendRequest($url, $data);
     }
 
-    // Для получения информации остаточно передать один из трех аттрибутов
     public function getProductInfo(string $offerId = null, int $ozonProductId = null, int $ozonSku = null)
     {
         $url = 'https://api-seller.ozon.ru/v2/product/info';
@@ -73,22 +73,40 @@ class OzonApi
         return $this->sendRequest($url, $data);
     }
 
-    public function importProduct(OzonProduct $ozonProduct)
+    public function getProductImportInfo($taskId)
     {
-        $url = 'https://api-seller.ozon.ru/v2/product/import';
+        $url = 'https://api-seller.ozon.ru/v1/product/import/info';
 
-        $data = $this->getProductImportData($ozonProduct);
+        $data = [
+            'task_id' => $taskId,
+        ];
 
         return $this->sendRequest($url, $data);
     }
 
-    public function getProductImportData(OzonProduct $ozonProduct): array
+    public function importProduct(OzonProduct $ozonProduct)
+    {
+        $url = 'https://api-seller.ozon.ru/v2/product/import';
+
+        $response = $this->sendRequest($url, $this->getProductData($ozonProduct));
+
+        if ($response) {
+            $data = json_decode($response, true);
+            $task = OzonTask::firstOrCreate([
+               'id' =>  $data['result']['task_id']
+            ]);
+
+            // todo run the task checking job
+        }
+        return $response;
+    }
+
+    public function getProductData(OzonProduct $ozonProduct): array // todo move in OzonProduct
     {
         return ['items' => [[
 
-            'attributes' => $this->formatAttributesArray($ozonProduct),
-
-            "complex_attributes" => [],
+            'attributes' => $ozonProduct->getAttribute('OZON_attributes'),
+            "complex_attributes" => $ozonProduct->getAttribute('complex_attributes'),
 
             "offer_id" => $ozonProduct->getAttribute('offer_id'),
             "category_id" => $ozonProduct->getAttribute('category_id'),
@@ -115,28 +133,6 @@ class OzonApi
             "pdf_list" => $ozonProduct->getAttribute('pdf_list') ?? []
 
         ]]];
-    }
-
-    protected function formatAttributesArray(OzonProduct $ozonProduct): array
-    {
-        $attributes = [];
-        foreach ($ozonProduct->attributes()->get() as $attribute) {
-            if(isset($attribute->pivot->values['value'])) {
-
-                array_push($attributes, [
-                    "complex_id" => 0,
-                    "id" => $attribute->id,
-                    "values" => [
-                        [
-                            "dictionary_value_id" => $attribute->pivot->values ? $attribute->pivot->values['option_id'] : null,
-                            "value" => $attribute->pivot->values ? $attribute->pivot->values['value'] : null,
-                        ]
-                    ]
-                ]);
-            }
-        }
-
-        return $attributes;
     }
 
     protected function sendRequest($url, array $data = null)

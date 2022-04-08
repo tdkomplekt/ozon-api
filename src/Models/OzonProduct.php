@@ -2,15 +2,22 @@
 
 namespace Tdkomplekt\OzonApi\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Tdkomplekt\OzonApi\Base\Model;
 
 class OzonProduct extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'ozon_products';
     public $timestamps = true;
+
+    protected $casts = [
+        'images' => 'array',
+        'OZON_attributes' => 'array',
+    ];
 
     protected static function boot()
     {
@@ -54,43 +61,68 @@ class OzonProduct extends Model
         }
     }
 
-    public function updateAttributeValue($attributeIdOrName, string $value)
-    {
-        if (is_integer($attributeIdOrName)) {
-            $attribute = $this->attributes()->get()->where('id', $attributeIdOrName)->first();
-        } else {
-            $attribute = $this->attributes()->get()->where('name', $attributeIdOrName)->first();
-        }
+//    public function updateAttributeValueById(int $attributeId, string $value = null)
+//    {
+//        $attribute = $this->attributes()->get()->where('id', $attributeId)->first();
+//
+//        if($attribute->dictionary_id) {
+//            $option = $this->getAttributeOptionByValue($attribute, $value);
+//
+//            $this->saveAttributeValuesArray($attribute->id, [[
+//                'option_id' => $option->id,
+//                'value' => $option->value,
+//            ]]);
+//        } else {
+//            $this->saveAttributeValuesArray($attribute->id, [[
+//                'value' => $value,
+//            ]]);
+//        }
+//    }
 
-        if($attribute->dictionary_id) {
-            $options = $attribute->options()
-                ->whereIn('ozon_category_id', [0, $this->category_id])
-                ->where('value', $value)
-                ->get();
+//    protected function getAttributeOptionByValue($attribute, $value): ?OzonAttributeOption
+//    {
+//        $option = null;
+//        $options = $attribute->options()
+//            ->whereIn('ozon_category_id', [0, $this->category_id])
+//            ->where('value', $value)
+//            ->get();
+//
+//        if (count($options) == 1) {
+//            $option = $options->first();
+//        }
+//
+//        return $option;
+//    }
 
-            if (count($options) == 1) {
-                $option = $options->first();
+//    public function updateAttributeValueByName(string $attributeName, string $value = null)
+//    {
+//        $attribute = $this->attributes()->get()->where('name', $attributeName)->first();
+//        if($attribute) {
+//            $this->updateAttributeValueById($attribute->id, $value);
+//        }
+//    }
 
-                $this->saveAttributeValuesArray($attribute->id, [
-                    'option_id' => $option->id,
-                    'value' => $option->value,
-                ]);
-            }
-        } else {
-            $this->saveAttributeValuesArray($attribute->id, [
-                'value' => $value,
-            ]);
-        }
-    }
-
-    public function getRequiredAttributesArrayList(): array
-    {
-        return $this->attributes()->get()->where('is_required', 1)->toArray();
-    }
+//    public function getAllAttributesArrayList(): array
+//    {
+//        return $this->attributes()->get()->toArray();
+//    }
+//
+//    public function getRequiredAttributesArrayList(): array
+//    {
+//        return $this->attributes()->get()->where('is_required', 1)->toArray();
+//    }
+//
+//    public function getFilledAttributesArrayList(): array
+//    {
+//        $results = [];
+//        foreach ($this->attributes()->get() as $attribute) {
+//            $results[$attribute->name] = $attribute->pivot->values;
+//        }
+//        return $results;
+//    }
 
     public function validate(): bool
     {
         return true; // TODO
     }
-
 }
