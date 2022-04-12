@@ -7,7 +7,6 @@ use Tdkomplekt\OzonApi\Base\Command;
 use Tdkomplekt\OzonApi\Models\OzonAttribute;
 use Tdkomplekt\OzonApi\Models\OzonBrand;
 use Tdkomplekt\OzonApi\Models\OzonCategory;
-use Tdkomplekt\OzonApi\Models\OzonAttributeOption;
 
 class SyncOptions extends Command
 {
@@ -17,7 +16,7 @@ class SyncOptions extends Command
         85, // Бренд
         88, // Серии
         4389, // Страна-изготовитель
-//        6383, // Материал
+        6383, // Материал
         9461, // Коммерческий тип
         9782, // Класс опасности товара
         10096, // Цвет товара

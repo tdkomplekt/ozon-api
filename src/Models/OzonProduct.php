@@ -49,77 +49,12 @@ class OzonProduct extends Model
             ->withPivot(['values']);
     }
 
-    public function saveAttributeValuesArray($attributeId, array $values)
+    public function getOzonAttributeValuesById($attributeId)
     {
-        $attribute = $this->attributes()->get()->where('id', $attributeId)->first();
-
-        $ozonProductValue = $attribute->pivot;
-
-        if($attribute && $ozonProductValue) {
-            $ozonProductValue->values = $values;
-            $ozonProductValue->save();
-        }
+        $collection = collect($this->attributesToArray()['OZON_attributes']);
+        $attributeData = $collection->firstWhere('id', $attributeId);
+        return $attributeData['values'];
     }
-
-//    public function updateAttributeValueById(int $attributeId, string $value = null)
-//    {
-//        $attribute = $this->attributes()->get()->where('id', $attributeId)->first();
-//
-//        if($attribute->dictionary_id) {
-//            $option = $this->getAttributeOptionByValue($attribute, $value);
-//
-//            $this->saveAttributeValuesArray($attribute->id, [[
-//                'option_id' => $option->id,
-//                'value' => $option->value,
-//            ]]);
-//        } else {
-//            $this->saveAttributeValuesArray($attribute->id, [[
-//                'value' => $value,
-//            ]]);
-//        }
-//    }
-
-//    protected function getAttributeOptionByValue($attribute, $value): ?OzonAttributeOption
-//    {
-//        $option = null;
-//        $options = $attribute->options()
-//            ->whereIn('ozon_category_id', [0, $this->category_id])
-//            ->where('value', $value)
-//            ->get();
-//
-//        if (count($options) == 1) {
-//            $option = $options->first();
-//        }
-//
-//        return $option;
-//    }
-
-//    public function updateAttributeValueByName(string $attributeName, string $value = null)
-//    {
-//        $attribute = $this->attributes()->get()->where('name', $attributeName)->first();
-//        if($attribute) {
-//            $this->updateAttributeValueById($attribute->id, $value);
-//        }
-//    }
-
-//    public function getAllAttributesArrayList(): array
-//    {
-//        return $this->attributes()->get()->toArray();
-//    }
-//
-//    public function getRequiredAttributesArrayList(): array
-//    {
-//        return $this->attributes()->get()->where('is_required', 1)->toArray();
-//    }
-//
-//    public function getFilledAttributesArrayList(): array
-//    {
-//        $results = [];
-//        foreach ($this->attributes()->get() as $attribute) {
-//            $results[$attribute->name] = $attribute->pivot->values;
-//        }
-//        return $results;
-//    }
 
     public function validate(): bool
     {

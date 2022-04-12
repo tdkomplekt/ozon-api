@@ -87,7 +87,7 @@ class CreateOzonTables extends Migration
             $table->integer('depth')->nullable()->default(null);
             $table->enum('dimension_unit', ['mm'])->default('mm');
 
-            $table->json('attributes')->nullable()->default(null);
+            $table->json('OZON_attributes')->nullable()->default(null);
             $table->json('complex_attributes')->nullable()->default(null);
 
             $table->string('primary_image')->nullable()->default(null);
