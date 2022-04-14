@@ -116,10 +116,10 @@ class CreateOzonTables extends Migration
     public function down()
     {
         Schema::dropIfExists('ozon_tasks');
+        Schema::dropIfExists('ozon_products');
         Schema::dropIfExists('ozon_category_attribute_option');
         Schema::dropIfExists('ozon_attribute_options');
         Schema::dropIfExists('ozon_category_attribute');
-        Schema::dropIfExists('ozon_products');
         Schema::dropIfExists('ozon_attributes');
         Schema::dropIfExists('ozon_categories');
     }
