@@ -105,7 +105,7 @@ class OzonApi
     {
         return ['items' => [[
 
-            'attributes' => $ozonProduct->getAttribute('OZON_attributes'),
+            'attributes' => $ozonProduct->getAttribute('attributes'),
             "complex_attributes" => $ozonProduct->getAttribute('complex_attributes'),
 
             "offer_id" => $ozonProduct->getAttribute('offer_id'),
