@@ -50,14 +50,14 @@ class OzonAttribute extends Model
         return $options;
     }
 
-    public function values(): HasMany
+    public function containsOptionId($optionId, $categoryId = null): bool
     {
-        $options = $this->hasMany(
-            OzonProductAttributeValuePivot::class,
-            'ozon_attribute_id',
-            'id',
-        );
+        $options = $this->options()->wherePivot('ozon_attribute_option_id', $optionId);
 
-        return $options;
+        if(!is_null($categoryId)) {
+            $options = $options->wherePivot('ozon_category_id', $categoryId);
+        }
+
+        return $options->count() > 0;
     }
 }

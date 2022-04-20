@@ -68,4 +68,8 @@ class OzonCategory extends Model
         return $parents;
     }
 
+    public function containsAttributeId($attributeId): bool
+    {
+        return  $this->attributes()->wherePivot('ozon_attribute_id', $attributeId)->count() > 0;
+    }
 }
