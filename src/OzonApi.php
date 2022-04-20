@@ -3,6 +3,7 @@
 namespace Tdkomplekt\OzonApi;
 
 use Composer\Util\Http\Response;
+use Google\Collection;
 use Tdkomplekt\OzonApi\Models\OzonCategory;
 use Tdkomplekt\OzonApi\Models\OzonProduct;
 use Tdkomplekt\OzonApi\Models\OzonTask;
@@ -10,6 +11,7 @@ use Tdkomplekt\OzonApi\Models\OzonTask;
 class OzonApi
 {
     protected string $language = 'DEFAULT';
+    protected int $importLimitCount = 100;
 
     public function getCategoriesTree()
     {
@@ -86,25 +88,49 @@ class OzonApi
 
     public function importProduct(OzonProduct $ozonProduct)
     {
+        return $this->importProducts(collect([$ozonProduct]));
+    }
+
+    public function importProducts(\Illuminate\Support\Collection $ozonProducts)
+    {
         $url = 'https://api-seller.ozon.ru/v2/product/import';
 
-        $response = $this->sendRequest($url, $this->getProductData($ozonProduct));
+        if(count($ozonProducts) > $this->importLimitCount) {
+            dd('error import limit > 100'); // todo throw exception
+        }
 
+        $data = [
+            'items' => $ozonProducts->map(function ($ozonProduct) {
+                return $this->getProductData($ozonProduct);
+            })
+        ];
+
+        $response = $this->sendRequest($url, $data);
+        $this->saveTask($response);
+
+        return $response;
+    }
+
+    protected function saveTask($response)
+    {
         if ($response) {
-            $data = json_decode($response, true);
             $task = OzonTask::firstOrCreate([
-               'id' =>  $data['result']['task_id']
+                'id' =>  $this->parseTaskIdFromJsonResponse($response)
             ]);
 
             // todo run the task checking job
         }
-        return $response;
+    }
+
+    public function parseTaskIdFromJsonResponse($response)
+    {
+        $data = json_decode($response, true);
+        return $data['result']['task_id'];
     }
 
     public function getProductData(OzonProduct $ozonProduct): array // todo move in OzonProduct
     {
-        return ['items' => [[
-
+        return [
             'attributes' => $ozonProduct->getAttribute('attributes'),
             "complex_attributes" => $ozonProduct->getAttribute('complex_attributes'),
 
@@ -131,8 +157,7 @@ class OzonApi
             "images360" => $ozonProduct->getAttribute('images360') ?? [],
             "color_image" => $ozonProduct->getAttribute('color_image') ?? "",
             "pdf_list" => $ozonProduct->getAttribute('pdf_list') ?? []
-
-        ]]];
+        ];
     }
 
     protected function sendRequest($url, array $data = null)
