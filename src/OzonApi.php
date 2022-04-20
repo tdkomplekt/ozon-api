@@ -3,8 +3,6 @@
 namespace Tdkomplekt\OzonApi;
 
 use Composer\Util\Http\Response;
-use Google\Collection;
-use Tdkomplekt\OzonApi\Models\OzonCategory;
 use Tdkomplekt\OzonApi\Models\OzonProduct;
 use Tdkomplekt\OzonApi\Models\OzonTask;
 
@@ -12,6 +10,15 @@ class OzonApi
 {
     protected string $language = 'DEFAULT';
     protected int $importLimitCount = 100;
+
+    protected string $clientId;
+    protected string $apiKey;
+
+    public function __construct($clientId = null, $apiKey = null)
+    {
+        $this->clientId = $clientId ?? config('ozon-api.client_id');
+        $this->apiKey = $apiKey ?? config('ozon-api.api_key');
+    }
 
     public function getCategoriesTree()
     {
@@ -174,8 +181,8 @@ class OzonApi
         $headers = array(
             "X-Custom-Header: value",
             "Content-Type: application/json",
-            "Client-Id: ".config('ozon-api.client_id'),
-            "Api-Key: ".config('ozon-api.api_key'),
+            "Client-Id: ".$this->clientId,
+            "Api-Key: ".$this->apiKey,
         );
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 

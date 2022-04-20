@@ -47,7 +47,7 @@ class OzonApiServiceProvider extends ServiceProvider
 
         // Register the service the package provides.
         $this->app->singleton('ozon-api', function ($app) {
-            return new OzonApi;
+            return new OzonApi();
         });
     }
 
