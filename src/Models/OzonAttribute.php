@@ -55,7 +55,7 @@ class OzonAttribute extends Model
         $options = $this->options()->wherePivot('ozon_attribute_option_id', $optionId);
 
         if(!is_null($categoryId)) {
-            $options = $options->wherePivot('ozon_category_id', $categoryId);
+            $options = $options->wherePivotIn('ozon_category_id', [$categoryId, 0]);
         }
 
         return $options->count() > 0;
