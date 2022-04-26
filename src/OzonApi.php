@@ -3,6 +3,7 @@
 namespace Tdkomplekt\OzonApi;
 
 use Composer\Util\Http\Response;
+use Tdkomplekt\OzonApi\Helpers\OzonHelper;
 use Tdkomplekt\OzonApi\Models\OzonProduct;
 use Tdkomplekt\OzonApi\Models\OzonTask;
 
@@ -109,30 +110,10 @@ class OzonApi
         $data = [
             'items' => $ozonProducts->map(function ($ozonProduct) {
                 return $this->getProductData($ozonProduct);
-            })
+            })->toArray()
         ];
 
-        $response = $this->sendRequest($url, $data);
-        $this->saveTask($response);
-
-        return $response;
-    }
-
-    protected function saveTask($response)
-    {
-        if ($response) {
-            $task = OzonTask::firstOrCreate([
-                'id' =>  $this->parseTaskIdFromJsonResponse($response)
-            ]);
-
-            // todo run the task checking job
-        }
-    }
-
-    public function parseTaskIdFromJsonResponse($response)
-    {
-        $data = json_decode($response, true);
-        return $data['result']['task_id'];
+        return $this->sendRequest($url, $data);
     }
 
     public function getProductData(OzonProduct $ozonProduct): array // todo move in OzonProduct

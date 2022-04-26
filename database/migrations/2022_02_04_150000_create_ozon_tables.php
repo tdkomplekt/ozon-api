@@ -67,6 +67,7 @@ class CreateOzonTables extends Migration
         Schema::create('ozon_products', function (\Illuminate\Database\Schema\Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')->nullable()->default(null);
+            $table->foreignId('product_id')->nullable()->default(null);
 
             $table->string('offer_id')->index();
             $table->foreignId('category_id')->index();
@@ -103,7 +104,7 @@ class CreateOzonTables extends Migration
 
         Schema::create('ozon_tasks', function (Blueprint $table) {
             $table->id();
-            $table->json('response')->nullable()->default(null);
+            $table->json('result')->nullable()->default(null);
             $table->timestamps();
         });
     }

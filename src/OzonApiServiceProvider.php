@@ -49,6 +49,8 @@ class OzonApiServiceProvider extends ServiceProvider
         $this->app->singleton('ozon-api', function ($app) {
             return new OzonApi();
         });
+
+        require_once __DIR__. '/Helpers/OzonHelper.php';
     }
 
     /**
