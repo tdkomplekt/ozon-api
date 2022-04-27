@@ -21,6 +21,11 @@ class OzonApi
         $this->apiKey = $apiKey ?? config('ozon-api.api_key');
     }
 
+    public function getClientId()
+    {
+        return $this->clientId;
+    }
+
     public function getCategoriesTree()
     {
         $url = 'https://api-seller.ozon.ru/v1/categories/tree';
