@@ -2,34 +2,38 @@
 
 namespace Tdkomplekt\OzonApi\Helpers;
 
-use Google\Service\Tasks\Task;
-use Tdkomplekt\OzonApi\Jobs\OzonCheckTaskResultJob;
 use Tdkomplekt\OzonApi\Models\OzonTask;
+use Tdkomplekt\OzonApi\OzonApi;
 
 class OzonHelper
 {
+    protected OzonApi $ozonApi;
+
+    public function __construct(OzonApi $ozonApi)
+    {
+        $this->ozonApi = $ozonApi;
+    }
 
     public static function saveTaskFromResponse($ozonApiResponse)
     {
         if ($ozonApiResponse) {
             $taskId = OzonHelper::getTaskIdFromResponse($ozonApiResponse);
             if($taskId) {
-                $task = OzonTask::firstOrCreate([
+                OzonTask::firstOrCreate([
                     'id' =>  $taskId
                 ]);
-
-                // todo run the task checking job
             }
         }
     }
 
     public static function getTaskIdFromResponse($ozonApiResponse)
     {
-        $data = json_decode($ozonApiResponse, true);
+        $data = self::ozonApiResponseToArray($ozonApiResponse);
+
         return isset($data['result']) && isset($data['result']['task_id']) ? $data['result']['task_id'] : null ;
     }
 
-    public static function getTaskIdFromResponseAndSaveTask($ozonApiResponse)
+    public function getTaskIdFromResponseAndSaveTask($ozonApiResponse)
     {
         $taskId = self::getTaskIdFromResponse($ozonApiResponse);
         if($taskId) {
@@ -39,18 +43,37 @@ class OzonHelper
         return $taskId;
     }
 
-    public static function checkTasksInProcessing($dispatchNow = false)
+    public function getAllImportedProductsIds(): array
     {
-        $tasks = OzonTask::whereNull('check_result')->get();
+        return $this->getImportedProductsIdsRecursively();
+    }
 
-        foreach ($tasks as $task) {
-            $job = new OzonCheckTaskResultJob($task);
+    protected function getImportedProductsIdsRecursively(array &$resultArray = [], string $lastId = null, int $left = null): array
+    {
+        $response = $this->ozonApi->getProductList($lastId ?? null);
+        $data = $this::ozonApiResponseToArray($response);
 
-            if ($dispatchNow) {
-                $job->handle();
-            } else {
-                dispatch($job);
+        if(isset($data['result'])) {
+            $items = $data['result']['items'];
+            $total = $data['result']['total'];
+            $lastId = $data['result']['last_id'];
+
+            $left = $left ?? $total;
+            foreach ($items as $item) {
+                $resultArray[$item['offer_id']] = $item['product_id'];
+            }
+            $left = $left - count($items);
+
+            if ($left > 0) {
+                $resultArray = self::getImportedProductsIdsRecursively($resultArray, $lastId, $left);
             }
         }
+
+        return $resultArray;
+    }
+
+    protected static function ozonApiResponseToArray($ozonApiResponse): array
+    {
+        return json_decode($ozonApiResponse, true);
     }
 }

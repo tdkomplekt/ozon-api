@@ -2,15 +2,13 @@
 
 namespace Tdkomplekt\OzonApi;
 
-use Composer\Util\Http\Response;
-use Tdkomplekt\OzonApi\Helpers\OzonHelper;
 use Tdkomplekt\OzonApi\Models\OzonProduct;
-use Tdkomplekt\OzonApi\Models\OzonTask;
 
 class OzonApi
 {
     protected string $language = 'DEFAULT';
-    protected int $importLimitCount = 100;
+    protected int $importLimit = 100;
+    protected int $productListLimit = 1000;
 
     protected string $clientId;
     protected string $apiKey;
@@ -108,7 +106,7 @@ class OzonApi
     {
         $url = 'https://api-seller.ozon.ru/v2/product/import';
 
-        if(count($ozonProducts) > $this->importLimitCount) {
+        if(count($ozonProducts) > $this->importLimit) {
             dd('error import limit > 100'); // todo throw exception
         }
 
@@ -116,6 +114,23 @@ class OzonApi
             'items' => $ozonProducts->map(function ($ozonProduct) {
                 return $this->getProductData($ozonProduct);
             })->toArray()
+        ];
+
+        return $this->sendRequest($url, $data);
+    }
+
+    public function getProductList($lastId = null)
+    {
+        $url = 'https://api-seller.ozon.ru/v2/product/list';
+
+        $data = [
+            "filter" => [
+                "offer_id" => [],
+                "product_id" => [],
+                "visibility" => "ALL"
+            ],
+            "last_id" => $lastId ?? "",
+            "limit" => $this->productListLimit
         ];
 
         return $this->sendRequest($url, $data);
