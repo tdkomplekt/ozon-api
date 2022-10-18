@@ -26,9 +26,12 @@ class OzonApi
 
     public function getCategoriesTree()
     {
-        $url = 'https://api-seller.ozon.ru/v1/categories/tree';
-
-        return $this->sendRequest($url);
+        $url = 'https://api-seller.ozon.ru/v2/category/tree';
+        $data = [
+            'category_id' => null,
+            'language' => $this->language,
+        ];
+        return $this->sendRequest($url, $data);
     }
 
     public function getCategoryTree($categoryId)
