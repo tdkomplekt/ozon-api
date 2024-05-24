@@ -26,7 +26,7 @@ $ php artisan ozon:sync-categories
 $ php artisan ozon:sync-attributes
 $ php artisan ozon:sync-options
 $ php artisan ozon:sync-options {category_id}
-$ php artisan ozon:sync-options {category_id} {attribute_id}
+$ php artisan ozon:sync-options {category_id} {attribute_id} {type_id}
 ```
 
 ## Change log

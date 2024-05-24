@@ -26,9 +26,8 @@ class OzonApi
 
     public function getCategoriesTree()
     {
-        $url = 'https://api-seller.ozon.ru/v2/category/tree';
+        $url = 'https://api-seller.ozon.ru/v1/description-category/tree';
         $data = [
-            'category_id' => null,
             'language' => $this->language,
         ];
         return $this->sendRequest($url, $data);
@@ -46,31 +45,30 @@ class OzonApi
         return $this->sendRequest($url, $data);
     }
 
-    public function getCategoryAttributes($categoryId)
+    public function getCategoryAttributes($categoryId, $typeId)
     {
-        $url = 'https://api-seller.ozon.ru/v3/category/attribute';
+        $url = 'https://api-seller.ozon.ru/v1/description-category/attribute';
 
         $data = [
-            'attribute_type' => 'ALL',
-            'category_id' => [
-                $categoryId
-            ],
+            'description_category_id' => $categoryId,
             'language' => $this->language,
+            'type_id' => $typeId,
         ];
 
         return $this->sendRequest($url, $data);
     }
 
-    public function getCategoryAttributeValues($categoryId, $attributeId, $latsValueId = 0, $limit = 5000)
+    public function getCategoryAttributeValues($categoryId, $attributeId, $typeId, $latsValueId = 0, $limit = 5000)
     {
-        $url = 'https://api-seller.ozon.ru/v2/category/attribute/values';
+        $url = 'https://api-seller.ozon.ru/v1/description-category/attribute/values';
 
         $data = [
             'attribute_id' => $attributeId,
-            'category_id' => $categoryId,
+            'description_category_id' => $categoryId,
             'language' => $this->language,
             'last_value_id' => $latsValueId,
             'limit' => $limit,
+            'type_id' => $typeId,
         ];
 
         return $this->sendRequest($url, $data);
@@ -107,7 +105,7 @@ class OzonApi
 
     public function importProducts(\Illuminate\Support\Collection $ozonProducts)
     {
-        $url = 'https://api-seller.ozon.ru/v2/product/import';
+        $url = 'https://api-seller.ozon.ru/v3/product/import';
 
         if(count($ozonProducts) > $this->importLimit) {
             dd('error import limit > 100'); // todo throw exception
@@ -146,7 +144,7 @@ class OzonApi
             "complex_attributes" => $ozonProduct->getAttribute('complex_attributes'),
 
             "offer_id" => $ozonProduct->getAttribute('offer_id'),
-            "category_id" => $ozonProduct->getAttribute('category_id'),
+            "description_category_id" => $ozonProduct->getAttribute('category_id'),
             "barcode" => $ozonProduct->getAttribute('barcode') ?? '',
             "name" => $ozonProduct->getAttribute('name'),
 

@@ -10,7 +10,7 @@ use Tdkomplekt\OzonApi\Models\OzonCategory;
 
 class SyncOptions extends Command
 {
-    protected $signature = 'ozon:sync-options {category_id?} {attribute_id?}';
+    protected $signature = 'ozon:sync-options {category_id?} {attribute_id?} {type_id?}';
 
     protected array $commonAttributes = [
         85, // Бренд
@@ -27,24 +27,25 @@ class SyncOptions extends Command
     {
         $categoryId = $this->argument('category_id');
         $attributeId = $this->argument('attribute_id');
+        $typeId = $this->argument('type_id');
 
         $startTime = now();
 
-        if (isset($categoryId) && isset($attributeId)) {
-            $this->syncAttributeOptions($categoryId, $attributeId);
+        if (isset($categoryId) && isset($attributeId) && isset($typeId)) {
+            $this->syncAttributeOptions($categoryId, $attributeId, $typeId);
         }
 
-        if (isset($categoryId) && empty($attributeId)) {
+        if (isset($categoryId) && empty($attributeId) && empty($typeId)) {
             $ozonCategory = OzonCategory::find($categoryId);
             foreach ($ozonCategory->attributes()->where('dictionary_id', '>', 0)->get() as $ozonAttribute) {
-                $this->syncAttributeOptions($ozonCategory->id, $ozonAttribute->id);
+                $this->syncAttributeOptions($ozonCategory->id, $ozonAttribute->id, $ozonCategory->type_id);
             }
         }
 
-        if (empty($categoryId) && empty($attributeId)) {
+        if (empty($categoryId) && empty($attributeId) && empty($typeId)) {
             foreach (OzonCategory::where('last_node', 1)->get() as $ozonCategory) {
                 foreach ($ozonCategory->attributes()->where('dictionary_id', '>', 0)->get() as $ozonAttribute) {
-                    $this->syncAttributeOptions($ozonCategory->id, $ozonAttribute->id);
+                    $this->syncAttributeOptions($ozonCategory->id, $ozonAttribute->id, $ozonCategory->type_id);
                 }
             }
         }
@@ -55,14 +56,14 @@ class SyncOptions extends Command
     }
 
 
-    protected function syncAttributeOptions($categoryId, $attributeId)
+    protected function syncAttributeOptions($categoryId, $attributeId, $typeId)
     {
-        $this->saveNextOptions($categoryId, $attributeId);
+        $this->saveNextOptions($categoryId, $attributeId, $typeId);
     }
 
-    protected function saveNextOptions($categoryId, $attributeId, $lastValueId = 0, $limit = 5000)
+    protected function saveNextOptions($categoryId, $attributeId, $typeId, $lastValueId = 0, $limit = 5000)
     {
-        $json = $this->ozonApi->getCategoryAttributeValues($categoryId, $attributeId, $lastValueId, $limit);
+        $json = $this->ozonApi->getCategoryAttributeValues($categoryId, $attributeId, $typeId, $lastValueId, $limit);
 
         $ozonAttribute = OzonAttribute::find($attributeId);
 
@@ -86,7 +87,7 @@ class SyncOptions extends Command
             $lastValueId = last($dataArray['result'])['id'];
 
             if(isset($dataArray['has_next']) && $dataArray['has_next'] == true) {
-                $this->saveNextOptions($categoryId, $attributeId, $lastValueId, $limit);
+                $this->saveNextOptions($categoryId, $attributeId, $typeId, $lastValueId, $limit);
             }
         }
     }

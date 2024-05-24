@@ -23,7 +23,7 @@ class SyncAttributes extends Command
     protected function syncAttributes()
     {
         foreach (OzonCategory::all() as $category) {
-            $attributesTreeArray = $this->getAttributes($category->id);
+            $attributesTreeArray = $this->getAttributes($category->id, $category->type_id);
 
             foreach ($attributesTreeArray as $attributeData) {
                 $attribute = OzonAttribute::firstOrCreate([
@@ -48,9 +48,9 @@ class SyncAttributes extends Command
         }
     }
 
-    protected function getAttributes($categoryId): ?array
+    protected function getAttributes($categoryId, $typeId): ?array
     {
-        $response = $this->ozonApi->getCategoryAttributes($categoryId);
+        $response = $this->ozonApi->getCategoryAttributes($categoryId, $typeId);
 
         $dataArray = [];
         if ($response) {
