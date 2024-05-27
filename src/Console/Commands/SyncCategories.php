@@ -24,7 +24,12 @@ class SyncCategories extends Command
         $categoriesTreeArray = $this->getCategoriesTreeArray();
 
         foreach ($categoriesTreeArray as $category) {
-            $this->addCategory($category['category_id'], $category['title'], $category['children']);
+            $this->addCategory(
+                $category['category_id'],
+                $category['title'],
+                $category['type_id'],
+                $category['children']
+            );
         }
     }
 
@@ -40,7 +45,7 @@ class SyncCategories extends Command
         return $dataArray['result'] ?? [];
     }
 
-    private function addCategory($categoryId, $categoryName, $childrenArray = null, $parentCategoryId = 0)
+    private function addCategory($categoryId, $categoryName, $typeId, $childrenArray = null, $parentCategoryId = 0)
     {
         $category = OzonCategory::firstOrCreate(['id' => $categoryId]);
         if ($category->getOriginal('name') != $categoryName || $category->getOriginal(
@@ -49,6 +54,7 @@ class SyncCategories extends Command
             $category->update([
                 'name' => $categoryName,
                 'parent_id' => $parentCategoryId,
+                'type_id' =>  $typeId,
             ]);
         }
 
@@ -57,6 +63,7 @@ class SyncCategories extends Command
                 $this->addCategory(
                     $subCategory['category_id'],
                     $subCategory['title'],
+                    $subCategory['type_id'],
                     $subCategory['children'],
                     $categoryId
                 );
