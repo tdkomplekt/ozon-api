@@ -22,8 +22,8 @@ class SyncAttributes extends Command
 
     protected function syncAttributes()
     {
-        foreach (OzonCategory::all() as $category) {
-            $attributesTreeArray = $this->getAttributes($category->id, $category->type_id);
+        foreach (OzonCategory::where('type_id', '>', 0)->get() as $category) {
+            $attributesTreeArray = $this->getAttributes($category->parent_id, $category->type_id);
 
             foreach ($attributesTreeArray as $attributeData) {
                 $attribute = OzonAttribute::firstOrCreate([
@@ -37,7 +37,7 @@ class SyncAttributes extends Command
                 ]);
 
                 DB::table('ozon_category_attribute')->updateOrInsert([
-                    'ozon_category_id' => $category->id,
+                    'ozon_category_id' => $category->type_id,
                     'ozon_attribute_id' => $attribute->id,
                 ], [
                     'is_required' => $attributeData['is_required'],
@@ -57,6 +57,6 @@ class SyncAttributes extends Command
             $dataArray = json_decode($response, true);
         }
 
-        return $dataArray['result'][0]['attributes'] ?? [];
+        return $dataArray['result'] ?? [];
     }
 }

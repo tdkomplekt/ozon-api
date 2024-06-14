@@ -31,7 +31,7 @@ class SyncOptions extends Command
 
         $startTime = now();
 
-        if (isset($categoryId) && isset($attributeId) && isset($typeId)) {
+        if (!empty($categoryId) && !empty($attributeId) && !empty($typeId)) {
             $this->syncAttributeOptions($categoryId, $attributeId, $typeId);
         }
 
@@ -78,7 +78,7 @@ class SyncOptions extends Command
             foreach ($dataArray['result'] as $value) {
 
                 DB::table('ozon_category_attribute_option')->updateOrInsert([
-                    'ozon_category_id' => in_array($attributeId, $this->commonAttributes) ?  0 : $categoryId,
+                    'ozon_category_id' => in_array($attributeId, $this->commonAttributes) ?  0 : $typeId,
                     'ozon_attribute_id' => $ozonAttribute->id,
                     'ozon_attribute_option_id' => $value['id'],
                 ]);
