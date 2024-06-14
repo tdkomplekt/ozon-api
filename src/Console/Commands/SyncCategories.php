@@ -22,14 +22,15 @@ class SyncCategories extends Command
     public function syncCategories()
     {
         $categoriesTreeArray = $this->getCategoriesTreeArray();
-
         foreach ($categoriesTreeArray as $category) {
-            $this->addCategory(
-                $category['category_id'],
-                $category['title'],
-                $category['type_id'],
-                $category['children']
-            );
+            if (!$category['disabled']) {
+                $this->addCategory(
+                    $category['description_category_id'],
+                    $category['category_name'],
+                    $category['type_id'],
+                    $category['children']
+                );
+            }
         }
     }
 
@@ -60,13 +61,15 @@ class SyncCategories extends Command
 
         if ($childrenArray) {
             foreach ($childrenArray as $subCategory) {
-                $this->addCategory(
-                    $subCategory['category_id'],
-                    $subCategory['title'],
-                    $subCategory['type_id'],
-                    $subCategory['children'],
-                    $categoryId
-                );
+                if (!$subCategory['disabled']) {
+                    $this->addCategory(
+                        $subCategory['description_category_id'] ?: $subCategory['type_id'],
+                        $subCategory['category_name'] ?: $subCategory['type_name'],
+                        $subCategory['type_id'],
+                        $subCategory['children'],
+                        $categoryId
+                    );
+                }
             }
         }
     }
