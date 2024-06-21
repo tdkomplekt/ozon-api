@@ -36,16 +36,18 @@ class SyncOptions extends Command
         }
 
         if (isset($categoryId) && empty($attributeId) && empty($typeId)) {
-            $ozonCategory = OzonCategory::find($categoryId);
-            foreach ($ozonCategory->attributes()->where('dictionary_id', '>', 0)->get() as $ozonAttribute) {
-                $this->syncAttributeOptions($ozonCategory->id, $ozonAttribute->id, $ozonCategory->type_id);
+            $ozonCategories = OzonCategory::where('parent_id', $categoryId)->where('type_id', '>', 0)->get();
+            foreach ($ozonCategories as $category) {
+                foreach ($category->attributes()->where('dictionary_id', '>', 0)->get() as $ozonAttribute) {
+                    $this->syncAttributeOptions($category->parent_id, $ozonAttribute->id, $category->type_id);
+                }
             }
         }
 
         if (empty($categoryId) && empty($attributeId) && empty($typeId)) {
-            foreach (OzonCategory::where('last_node', 1)->get() as $ozonCategory) {
+            foreach (OzonCategory::where('last_node', 1)->where('type_id', '>', 0)->get() as $ozonCategory) {
                 foreach ($ozonCategory->attributes()->where('dictionary_id', '>', 0)->get() as $ozonAttribute) {
-                    $this->syncAttributeOptions($ozonCategory->id, $ozonAttribute->id, $ozonCategory->type_id);
+                    $this->syncAttributeOptions($ozonCategory->parent_id, $ozonAttribute->id, $ozonCategory->type_id);
                 }
             }
         }
