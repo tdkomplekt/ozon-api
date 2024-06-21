@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('ozon_products', function (Blueprint $table) {
-            $table->softDeletes();
+            $table->integer('type_id')->default(0)->after('category_id');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('ozon_products', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+            $table->dropColumn('type_id');
         });
     }
 };
