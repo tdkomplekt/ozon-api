@@ -14,7 +14,7 @@ class CreateTypeId extends Migration
     public function up()
     {
         Schema::table('ozon_categories', function (Blueprint $table) {
-            $table->integer('type_id');
+            $table->integer('type_id')->default(0)->after('category_id');
         });
     }
 
