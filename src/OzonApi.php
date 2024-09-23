@@ -120,6 +120,21 @@ class OzonApi
         return $this->sendRequest($url, $data);
     }
 
+    /**
+     * @param object $ozonProduct
+     * @return bool|string
+     */
+    public final function importImages(object $ozonProduct)
+    {
+        $url = 'https://api-seller.ozon.ru/v1/product/pictures/import';
+
+        $data['images'] = $ozonProduct->images;
+        $data['images360'] = [];
+        $data['product_id'] = $ozonProduct->product_id;
+
+        return $this->sendRequest($url, $data);
+    }
+
     public function getProductList($lastId = null)
     {
         $url = 'https://api-seller.ozon.ru/v2/product/list';
