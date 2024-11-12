@@ -87,6 +87,37 @@ class OzonApi
         return $this->sendRequest($url, $data);
     }
 
+    public function getProductInfoAttributes(
+        array $offerIds,
+        array $ozonProductIds,
+        string $lastId,
+        int $limit,
+        string $sortBy,
+        string $sortDir,
+    )
+    {
+        $url = 'https://api-seller.ozon.ru/v3/products/info/attributes';
+
+        $data['filter'] = [
+            'visibility' => 'ALL',
+        ];
+
+        if ($offerIds) {
+            $data['filter']['offer_id'] = $offerIds;
+        }
+
+        if ($ozonProductIds) {
+            $data['filter']['product_id'] = $ozonProductIds;
+        }
+
+        $data['last_id']  = $lastId;
+        $data['limit']    = $limit;
+        $data['sort_by']  = $sortBy;
+        $data['sort_dir'] = $sortDir;
+
+        return $this->sendRequest($url, $data);
+    }
+
     public function getProductImportInfo($taskId)
     {
         $url = 'https://api-seller.ozon.ru/v1/product/import/info';
