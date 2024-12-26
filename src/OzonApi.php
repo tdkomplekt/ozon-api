@@ -76,7 +76,7 @@ class OzonApi
 
     public function getProductInfo(string $offerId = null, int $ozonProductId = null, int $ozonSku = null)
     {
-        $url = 'https://api-seller.ozon.ru/v2/product/info';
+        $url = 'https://api-seller.ozon.ru/v3/product/info';
 
         $data = [
             'offer_id' => $offerId ?: '',
@@ -96,7 +96,7 @@ class OzonApi
         string $sortDir,
     )
     {
-        $url = 'https://api-seller.ozon.ru/v3/products/info/attributes';
+        $url = 'https://api-seller.ozon.ru/v4/products/info/attributes';
 
         $data['filter'] = [
             'visibility' => 'ALL',
